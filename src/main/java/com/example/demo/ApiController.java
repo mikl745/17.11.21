@@ -40,27 +40,30 @@ public class ApiController {
     }
 
 
-
     @PostMapping("users")
-    public void addUser(@RequestBody User new_user) throws Exception
+    public void addUser(@RequestBody UserProv new_user) throws Exception
     {
         //throw new NotFoundException();
+        String username = new_user.getUsername();
         for (User user : users)
         {
-            if (Objects.equals(user.getUsername(), new_user.getUsername()))
+            if (Objects.equals(user.getUsername(), username))
                 throw new ConflictException();
         }
-        for (int i = 0; i < new_user.getUsername().length(); i++)
+        //return new_user.getPassword() + " " + new_user.getRepeatPassword();
+        for (int i = 0; i < username.length(); i++)
         {
-            char c = new_user.getUsername().charAt(i);
+            char c = username.charAt(i);
             if (!((c >= 'a' && c <= 'z') || c == '_' || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9')))
                 throw new BadRequestException();
         }
-        users.add(new User(new_user));
+        if (!Objects.equals(new_user.getPassword(), new_user.getRepeatPassword()))
+            throw new BadRequestException();
+        users.add(new User(username, new_user.getPassword(), new_user.getAge()));
     }
 
     @GetMapping("users/{name}")
-    public String getTheme(@PathVariable("name") String name) throws Exception {
+    public String getUser(@PathVariable("name") String name) throws Exception {
         for (User user : users)
         {
             if (Objects.equals(user.getUsername(), name))
@@ -73,8 +76,22 @@ public class ApiController {
         throw new NotFoundException();
     }
 
+    @GetMapping("users/SearchForAge/{age}")
+    public String getUserAge(@PathVariable("age") Integer age) throws Exception {
+        String ans = "";
+        for (User user : users)
+        {
+            if (Math.abs(user.getAge() - age) <= 5)
+            {
+                ans += user.toString() + "\n";
+            }
+
+        }
+        return ans;
+    }
+
     @DeleteMapping("users/{name}")
-    public void DelTheme(@PathVariable("name") String name) throws Exception
+    public void Del(@PathVariable("name") String name) throws Exception
     {
         if (name.length() < 5) {
             throw new OtherErrorException();
@@ -93,8 +110,10 @@ public class ApiController {
     }
 
     @PutMapping("users/{name}")
-    public void updateUser(@PathVariable("name") String name, @RequestBody String pass) throws Exception
+    public void updateUser(@PathVariable("name") String name, @RequestBody UserProv userProv) throws Exception
     {
+        if (userProv.getPassword() != userProv.getRepeatPassword())
+            throw new BadRequestException();
         if (name.length() < 6) {
             throw new OtherErrorException();
         }
@@ -113,7 +132,7 @@ public class ApiController {
         for (User user : users)
             if (Objects.equals(user.getUsername(), name))
             {
-                user.setPassword(pass);
+                user.setPassword(userProv.getPassword());
                 return;
             }
         throw new NotFoundException();

@@ -1,20 +1,27 @@
 package com.example.demo;
 
-public class User {
-    String username, password;
+public class UserProv {
+    String username, password, repeatPassword;
     Integer age;
-    public User(String username, String password, Integer age)
+    public UserProv(String username,
+                    String password,
+                    String repeatPassword,
+                    Integer age)
     {
         this.username = username;
         this.password = password;
+        this.repeatPassword = repeatPassword;
         this.age = age;
     }
 
-    public User(User user) {
-        this.username = user.username;
-        this.password = user.password;
-        this.age = user.age;
+    public UserProv(String password, String repeatPassword)
+    {
+        this.username = "";
+        this.password = password;
+        this.repeatPassword = repeatPassword;
+        this.age = 0;
     }
+    public UserProv() {}
 
     String getUsername()
     {
@@ -23,6 +30,10 @@ public class User {
     String getPassword()
     {
         return password;
+    }
+    String getRepeatPassword()
+    {
+        return repeatPassword;
     }
     Integer getAge()
     {
